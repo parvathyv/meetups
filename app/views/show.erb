@@ -15,12 +15,31 @@
 <form action="/meetup/<%=@meetup.id%>" method="post">
 <div>
 
-  <% if @participant_type == 'New' %>
+  
+  <p>&nbsp</p>
+  <h1>Participants</h1>
+   <% @name_array.each do|value|%>
+    <p><%=value.first%></p>
+   <img src="<%=value[1]%>" style="height:200px;width:200px">
+   <%end%>
+  
+ 
+ </div>
+ </form>
+ 
+ <form action="/meetup/<%=@meetup.id%>" method="post">
+          <% if @joined == false %>
   <input type="submit" value="Join">
   <%else%>
-  <p>&nbsp</p>
-   <p> Your role : <%= @participant_type %></p> 
-  <%end%>
-
+          <p>&nbsp</p>
+          Comments Title: <input type="text" name="meetupcomtitle">
+          <p>&nbsp</p>
+         
+          Comments: <input type="text" name="meetupcomments" style = "width:500px"><br> 
+          <p>&nbsp</p>  
+          <input type="submit" value="Submit">
+   <%end%>
+    <p>&nbsp</p>   
+  <input type="submit" name = "delete" value="Leave Meetup">
 </div>
 </form>

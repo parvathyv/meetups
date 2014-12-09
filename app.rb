@@ -89,15 +89,16 @@ get '/meetup/:id' do
   
   meetup_id = params[:id]
   @meetup = Meetup.find_by id: meetup_id
-  
-  par = Participant.find_by meetup_id: meetup_id
+  @name_array = []
+  participants_array = @meetup.participants.map{|x| x.user_id}
  
+  @joined = participants_array.any?{|id| id = session[:user_id]}
+   
+  @name_array= User.where(id:  participants_array ).map{|y| [y.username,y.avatar_url]}
   
-  if par == nil
-   @participant_type = 'New'
-  else
-   @participant_type = par.participant_type
-   end 
+
+ 
+ 
 
   erb :show
 end
@@ -105,22 +106,48 @@ end
 
 post '/meetup/:id' do
 
-@meetup = Meetup.find_by id: params[:id]
+ 
+  @meetup = Meetup.find(params[:id])
 
-meetup_id = @meetup.id
+  meetup_id = @meetup.id
 
 
-current_user_id = session[:user_id]
-begin
+  current_user_id = session[:user_id]
+  participant_record= Participant.where("user_id = ? AND meetup_id = ?",  current_user_id, meetup_id)
+  
+  if params[:delete] == "Leave Meetup"
+      participant_record.map{|obj| obj.destroy}
+     
+  else  
 
-par = Participant.create!(user_id: "#{current_user_id}", meetup_id: "#{meetup_id}", participant_type: 'Participant')
-flash[:notice] = "Successfully joined"
-rescue ActiveRecord::RecordInvalid => invalid
+      if params[:meetupcomments] != '' &&  params[:meetupcomtitle] != ''
 
-end 
+        joined = Participant.where("user_id= ? AND meetup_id = ?", current_user_id, meetup_id )
+        
+          if joined.size ==0
+            flash[:notice] = "You have not joined this meetup to comment"
+            redirect "/meetup/#{meetup_id}" 
+          else
+            participant_record.each do|obj|
+              Participant.update(obj.id, comments: params[:meetupcomments])
+              Participant.update(obj.id,comment_title: params[:meetupcomtitle])
+            end
+          end
+     else
+        
+        begin
 
-redirect "/"
+          par = Participant.create!(user_id: "#{current_user_id}", meetup_id: "#{meetup_id}", participant_type: 'Participant')
+          flash[:notice] = "Successfully joined"
+          rescue ActiveRecord::RecordInvalid => invalid
+          flash[:notice] = "Try again"
+      
+        end
 
+      end
+  end  
+ redirect "/"
+ 
 end
 
  get '/auth/github/callback' do
@@ -131,6 +158,7 @@ end
   flash[:notice] = "You're now signed in as #{user.username}!"
 
   redirect '/'
+
 end
 
 get '/sign_out' do

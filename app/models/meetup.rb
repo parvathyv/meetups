@@ -1,6 +1,9 @@
 class Meetup < ActiveRecord::Base
-	validates :name, presence: true
-	has_many :partcipants
+	has_many :participants
 	has_many :users, through: :participants
+	
+	validates :name, presence: true
+	validates :location, presence: true
+	
 end
 
