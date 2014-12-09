@@ -89,12 +89,24 @@ get '/meetup/:id' do
   
   meetup_id = params[:id]
   @meetup = Meetup.find_by id: meetup_id
+  part_array_of = @meetup.participants
   @name_array = []
-  participants_array = @meetup.participants.map{|x| x.user_id}
- 
-  @joined = participants_array.any?{|id| id = session[:user_id]}
+  @arr =[]
+  @res = []
+  #@name_array =User.joins(:participants,:meetups).where("participants.meetup_id = meetups.id AND meetups.id = #{meetup_id}")
+  @name_array = @meetup.users
+  
+  @arr = @meetup.participants
    
-  @name_array= User.where(id:  participants_array ).map{|y| [y.username,y.avatar_url]}
+  @arr.each do|arr|
+    
+      @res = @name_array.map{|nameobj| [nameobj.username, arr.participant_type, nameobj.avatar_url] if nameobj.id == arr.user_id}
+    
+  end
+
+
+  @joined = @arr.any?{|obj| obj.user_id == session[:user_id]}
+   
   
 
  
@@ -129,8 +141,8 @@ post '/meetup/:id' do
             redirect "/meetup/#{meetup_id}" 
           else
             participant_record.each do|obj|
-              Participant.update(obj.id, comments: params[:meetupcomments])
-              Participant.update(obj.id,comment_title: params[:meetupcomtitle])
+              Participant.update(obj.id, comments: params[:meetupcomments],comment_title: params[:meetupcomtitle])
+            
             end
           end
      else

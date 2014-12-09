@@ -18,9 +18,10 @@
   
   <p>&nbsp</p>
   <h1>Participants</h1>
-   <% @name_array.each do|value|%>
+   <% @res.each do|value|%>
     <p><%=value.first%></p>
-   <img src="<%=value[1]%>" style="height:200px;width:200px">
+    <p><%=value[1]%></p>
+   <img src="<%=value[2]%>" style="height:200px;width:200px">
    <%end%>
   
  
