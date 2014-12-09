@@ -1,0 +1,30 @@
+ <% if signed_in? %>
+
+ 	<p>&nbsp</p>
+        <h1> Your meetup details</h1> 
+        <p>&nbsp</p>
+        <form action="/meetup/new" method="post">
+			<div>
+  				Name: <input type="text" name="meetupname">
+  				<p>&nbsp</p>
+  				Location: <input type="text" name="meetuplocation">
+  				<p>&nbsp</p>
+  				Description: <input type="text" name="meetupdescription"><br> 
+  				<p>&nbsp</p> 	
+  				<input type="submit" value="Submit">
+
+			</div>
+
+		</form>
+       
+      	<% else %>
+         <script type="text/javascript"> alert("You need to be signed in to do that!")   </script>
+         <p>&nbsp</p>
+        <a href="/auth/github">Click here to Sign in</a>
+      	<% end %>
+
+
+
+
+
+

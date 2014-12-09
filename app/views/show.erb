@@ -1,0 +1,26 @@
+<h1><%=@meetup.name%></h1>
+
+<ul>
+     <p>Message : <%= @message %></p>
+    <p>Name : <%=@meetup.name%></p>
+    <p>At : <%=@meetup.location%></p>
+    <p>About : <%=@meetup.description%></p>
+   		
+   	
+   
+
+</ul>
+
+
+<form action="/meetup/<%=@meetup.id%>" method="post">
+<div>
+
+  <% if @participant_type == 'New' %>
+  <input type="submit" value="Join">
+  <%else%>
+  <p>&nbsp</p>
+   <p> Your role : <%= @participant_type %></p> 
+  <%end%>
+
+</div>
+</form>
