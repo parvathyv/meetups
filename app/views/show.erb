@@ -1,7 +1,7 @@
 <h1><%=@meetup.name%></h1>
 
 <ul>
-     <p>Message : <%= @message %></p>
+    
     <p>Name : <%=@meetup.name%></p>
     <p>At : <%=@meetup.location%></p>
     <p>About : <%=@meetup.description%></p>
@@ -12,7 +12,7 @@
 </ul>
 
 
-<form action="/meetup/<%=@meetup.id%>" method="post">
+
 <div>
 
   
@@ -22,11 +22,16 @@
     <p><%=value.first%></p>
     <p><%=value[1]%></p>
    <img src="<%=value[2]%>" style="height:200px;width:200px">
+   
    <%end%>
-  
- 
+    <h3>Comments</h3>
+     <% @comment.each do|value|%>
+     <p><%=value[0]%></p>
+      <p><%=value[1]%></p>
+      <%end%>
+   
  </div>
- </form>
+
  
  <form action="/meetup/<%=@meetup.id%>" method="post">
           <% if @joined == false %>

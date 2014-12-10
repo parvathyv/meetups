@@ -86,25 +86,35 @@ end
 
 
 get '/meetup/:id' do
-  
+ 
   meetup_id = params[:id]
-  @meetup = Meetup.find_by id: meetup_id
-  part_array_of = @meetup.participants
+  @meetup = Meetup.find(meetup_id)
+   
   @name_array = []
   @arr =[]
   @res = []
+  @comment = []
   #@name_array =User.joins(:participants,:meetups).where("participants.meetup_id = meetups.id AND meetups.id = #{meetup_id}")
   @name_array = @meetup.users
   
   @arr = @meetup.participants
+  
+  
    
   @arr.each do|arr|
     
-      @res = @name_array.map{|nameobj| [nameobj.username, arr.participant_type, nameobj.avatar_url] if nameobj.id == arr.user_id}
-    
+     @name_array.each do|nameobj| 
+        arr.comments = '' if arr.comments == nil
+         arr.comment_title = '' if arr.comment_title == nil
+
+        @res << [nameobj.username, arr.participant_type, nameobj.avatar_url] if nameobj.id == arr.user_id
+        
+        end
+        @comment << [arr.comments, arr.comment_title]
   end
-
-
+ 
+  @comment.sort_by!{ |m| m[0].downcase }
+   
   @joined = @arr.any?{|obj| obj.user_id == session[:user_id]}
    
   
@@ -129,11 +139,12 @@ post '/meetup/:id' do
   
   if params[:delete] == "Leave Meetup"
       participant_record.map{|obj| obj.destroy}
-     
+      
   else  
 
-      if params[:meetupcomments] != '' &&  params[:meetupcomtitle] != ''
-
+      if params[:meetupcomments] != '' && params[:meetupcomments].nil? == false &&  params[:meetupcomtitle] != '' && params[:meetupcomtitle].nil? == false
+       # && params[:meetupcomments].empty? == false &&  params[:meetupcomtitle].empty? == false
+        binding.pry
         joined = Participant.where("user_id= ? AND meetup_id = ?", current_user_id, meetup_id )
         
           if joined.size ==0
