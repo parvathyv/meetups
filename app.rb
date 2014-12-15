@@ -32,23 +32,14 @@ end
 
 
 
-
 def validate(name, location, desc)
-
-
   begin
-
-  @meetup  = Meetup.create!(name: name, location: location, description: desc)
-  message = @meetup.id
-  rescue ActiveRecord::RecordInvalid => invalid
-  message = 0 if logger.error($!.to_s)  
- 
-
-
-end
- 
-message
-
+    @meetup  = Meetup.create!(name: name, location: location, description: desc)
+    message = @meetup.id
+    rescue ActiveRecord::RecordInvalid => invalid
+    message = 0 if logger.error($!.to_s)  
+  end
+  message
 end
 
 get '/' do
@@ -57,84 +48,79 @@ get '/' do
 end
 
 get '/meetup/new' do
-
+  authenticate!
   erb :new
 end
 
 post '/meetup/new' do
+  authenticate!
+  name = params[:meetupname]
+  location = params[:meetuplocation]
+  desc = params[:meetupdescription]
 
-name = params[:meetupname]
-location = params[:meetuplocation]
-desc = params[:meetupdescription]
+  succ = validate(name, location, desc)
 
-succ = validate(name, location, desc)
-
-if succ != 0
+  if succ != 0  
  
-  flash[:notice] = "Success !!"
-  meetup_id = succ
-  current_user_id = session[:user_id]
-  par = Participant.create!(user_id: "#{current_user_id}", meetup_id: "#{meetup_id}", participant_type: 'Creater')
+    flash[:notice] = "Success !!"
+    meetup_id = succ
+    current_user_id = session[:user_id]
+    par = Participant.create!(user_id: "#{current_user_id}", meetup_id: "#{meetup_id}", participant_type: 'Creater')
   
-  redirect "/meetup/#{meetup_id}"
-else
-  flash[:notice] = "You left fields blank, Try again !"
-  redirect "/meetup/new"
-end
+    redirect "/meetup/#{meetup_id}"
+  else
+    flash[:notice] = "You left fields blank, Try again !"
+    redirect "/meetup/new"
+  end
 
 end
 
 
 get '/meetup/:id' do
+  authenticate!
  
   meetup_id = params[:id]
   @meetup = Meetup.find(meetup_id)
    
   @name_array = []
-  @arr =[]
+  @arr = []
   @res = []
-  @comment = []
-  #@name_array =User.joins(:participants,:meetups).where("participants.meetup_id = meetups.id AND meetups.id = #{meetup_id}")
+  comment = []
+  
   @name_array = @meetup.users
   
   @arr = @meetup.participants
   
-  
-   
   @arr.each do|arr|
-    
-     @name_array.each do|nameobj| 
-        arr.comments = '' if arr.comments == nil
-         arr.comment_title = '' if arr.comment_title == nil
-
-        @res << [nameobj.username, arr.participant_type, nameobj.avatar_url] if nameobj.id == arr.user_id
-        
-        end
-        @comment << [arr.comments, arr.comment_title]
+    @name_array.each do|nameobj| 
+      @res << [nameobj.username, arr.participant_type, nameobj.avatar_url] if nameobj.id == arr.user_id
+    end
+    comment << arr.usercomments
   end
+    
+  @comments_array = []
+  
+  comment.map{|x| x.map{|y| @comments_array << y.comments}}
+  
+  @comments_array = @comments_array.sort
  
-  @comment.sort_by!{ |m| m[0].downcase }
-   
   @joined = @arr.any?{|obj| obj.user_id == session[:user_id]}
    
-  
-
- 
- 
-
   erb :show
+
 end
 
 
 post '/meetup/:id' do
-
- 
+  
+  authenticate!
   @meetup = Meetup.find(params[:id])
 
   meetup_id = @meetup.id
-
-
+  authenticate!
+  
   current_user_id = session[:user_id]
+  
   participant_record= Participant.where("user_id = ? AND meetup_id = ?",  current_user_id, meetup_id)
   
   if params[:delete] == "Leave Meetup"
@@ -143,20 +129,19 @@ post '/meetup/:id' do
   else  
 
       if params[:meetupcomments] != '' && params[:meetupcomments].nil? == false &&  params[:meetupcomtitle] != '' && params[:meetupcomtitle].nil? == false
-       # && params[:meetupcomments].empty? == false &&  params[:meetupcomtitle].empty? == false
-        binding.pry
+      
         joined = Participant.where("user_id= ? AND meetup_id = ?", current_user_id, meetup_id )
         
-          if joined.size ==0
-            flash[:notice] = "You have not joined this meetup to comment"
-            redirect "/meetup/#{meetup_id}" 
-          else
-            participant_record.each do|obj|
-              Participant.update(obj.id, comments: params[:meetupcomments],comment_title: params[:meetupcomtitle])
-            
-            end
-          end
-     else
+        if joined.size ==0
+          flash[:notice] = "You have not joined this meetup to comment"
+          redirect "/meetup/#{meetup_id}" 
+        else
+          participant_record.each do|obj|
+          Usercomment.create(participant_id: obj.id, comments: params[:meetupcomments],comment_title: params[:meetupcomtitle])
+        end
+      end
+      
+      else
         
         begin
 
@@ -166,10 +151,10 @@ post '/meetup/:id' do
           flash[:notice] = "Try again"
       
         end
-
       end
-  end  
- redirect "/"
+  end 
+
+  redirect "/"
  
 end
 

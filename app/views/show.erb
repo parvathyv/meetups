@@ -1,51 +1,41 @@
 <h1><%=@meetup.name%></h1>
 
 <ul>
-    
     <p>Name : <%=@meetup.name%></p>
     <p>At : <%=@meetup.location%></p>
     <p>About : <%=@meetup.description%></p>
-   		
-   	
-   
-
 </ul>
 
 
 
 <div>
-
-  
   <p>&nbsp</p>
   <h1>Participants</h1>
    <% @res.each do|value|%>
-    <p><%=value.first%></p>
-    <p><%=value[1]%></p>
-   <img src="<%=value[2]%>" style="height:200px;width:200px">
-   
+     <p><%=value.first%></p>
+     <p><%=value[1]%></p>
+     <img src="<%=value[2]%>" style="height:200px;width:200px">
    <%end%>
-    <h3>Comments</h3>
-     <% @comment.each do|value|%>
-     <p><%=value[0]%></p>
-      <p><%=value[1]%></p>
-      <%end%>
    
- </div>
+   <h3>Comments</h3>
+     <% @comments_array.each do|value|%>
+     <p><%=value%></p>
+   <%end%>
+</div>
 
  
- <form action="/meetup/<%=@meetup.id%>" method="post">
-          <% if @joined == false %>
-  <input type="submit" value="Join">
+<form action="/meetup/<%=@meetup.id%>" method="post">
+  <% if @joined == false %>
+    <input type="submit" value="Join">
   <%else%>
-          <p>&nbsp</p>
-          Comments Title: <input type="text" name="meetupcomtitle">
-          <p>&nbsp</p>
-         
-          Comments: <input type="text" name="meetupcomments" style = "width:500px"><br> 
-          <p>&nbsp</p>  
-          <input type="submit" value="Submit">
-   <%end%>
     <p>&nbsp</p>   
-  <input type="submit" name = "delete" value="Leave Meetup">
-</div>
+    <input type="submit" name = "delete" value="Leave Meetup">
+  <%end%>
+  <p>&nbsp</p>
+  Comments Title: <input type="text" name="meetupcomtitle">
+  <p>&nbsp</p>
+  Comments: <input type="text" name="meetupcomments" style = "width:500px"><br> 
+  <p>&nbsp</p>  
+ <input type="submit" value="Submit">
+
 </form>
